@@ -1,0 +1,17 @@
+# Use OpenJDK 21 as the base image
+FROM openjdk:21
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the packaged JAR application into the working directory
+COPY target/wisecow-app.jar /app/wisecow-app.jar
+
+# Expose the port the application listens on
+EXPOSE 8080
+
+# Command to run the application
+CMD ["java", "-jar", "wisecow-app.jar"]
+
+
+Ensure you have the application JAR file named wisecow-app.jar in the target directory before building the Docker image. Adjust the JAR file name as necessary to match your build output.
