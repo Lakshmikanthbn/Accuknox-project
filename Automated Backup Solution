@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Variables
+backup_source="/path/to/source/directory"
+backup_destination="user@remote_server:/path/to/destination/directory"
+backup_log="/var/log/backup.log"
+
+# Perform backup
+echo "Starting backup: $(date)" | tee -a $backup_log
+rsync -avz --delete $backup_source $backup_destination 2>&1 | tee -a $backup_log
+
+# Check if backup succeeded
+if [ "${PIPESTATUS[0]}" -eq "0" ]; then
+  echo "Backup completed successfully at $(date)" | tee -a $backup_log
+else
+  echo "Backup failed at $(date)" | tee -a $backup_log
+fi
