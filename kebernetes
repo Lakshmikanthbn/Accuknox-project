@@ -1,0 +1,48 @@
+### Kubernetes Manifest Files
+
+#### Deployment
+
+yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wisecow-deployment
+  labels:
+    app: wisecow
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: wisecow
+  template:
+    metadata:
+      labels:
+        app: wisecow
+    spec:
+      containers:
+      - name: wisecow
+        image: <your-docker-image-name>:<tag>
+        ports:
+        - containerPort: 8080
+
+
+Replace <your-docker-image-name> and <tag> with the actual Docker image name and tag for the Wisecow application.
+
+#### Service
+
+yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: wisecow-service
+  labels:
+    app: wisecow
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    app: wisecow
+
+
