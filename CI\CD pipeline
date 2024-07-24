@@ -1,0 +1,58 @@
+### GitHub Actions Workflow
+
+yaml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - javaMigrationFrom8to21
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+      
+      - name: Set up Java
+        uses: actions/setup-java@v2
+        with:
+          java-version: '21'
+          distribution: 'adopt'
+      
+      - name: Log in to Docker registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.REGISTRY_URL }}/wisecow-app:${{ github.sha }}
+  
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+      
+      - name: Set up Kubectl
+        uses: azure/setup-kubectl@v1
+      
+      - name: Configure Kubectl
+        run: |
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+      
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl set image deployment/wisecow-deployment wisecow=${{ secrets.REGISTRY_URL }}/wisecow-app:${{ github.sha }} --record
+          kubectl rollout status deployment/wisecow-deployment
+
+
